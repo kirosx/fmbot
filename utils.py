@@ -18,4 +18,10 @@ def allow_user(message_from_id: int):
     return True if message_from_id in ALLOWED_USERS else False
 
 
+def callback_delete_checker(callback_string: str, caller_id: int):
+    command, obj, user = callback_string.split()
+    return True if caller_id == int(user) else False  # TODO verify that PaymentRecord belong to user
+
+
+
 
