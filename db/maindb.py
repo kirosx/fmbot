@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import DATABASE_URL, REMOTE_DATABASE
-from .dbclass import User, PaymentRecord
+from .dbclass import User, PaymentRecord, DebtRecord
 from tabulate import tabulate
 from datetime import timedelta, datetime
 
@@ -23,10 +23,16 @@ class Database(metaclass=Singleton):
         self.session = sessionmaker(self.engine)()
         self.users = self.session.query(User)
         self.payments = self.session.query(PaymentRecord)
+        self.debt = self.session.query(DebtRecord)
 
     @staticmethod
     def abs_sum_of_values(query):
         return sum([i.value for i in query])
+
+    @staticmethod
+    def total_sum(queryset):
+        return sum([x.value for x in queryset if x.payment_type == '+'])\
+               - sum([y.value for y in queryset if y.payment_type == '-'])
 
     def find_user_by_tgid(self, tgid: int):
         return self.users.filter(User.tgid == tgid).first()
@@ -52,3 +58,12 @@ class Database(metaclass=Singleton):
     def total_result_for_user(self, tgid: int):
         return (self.abs_sum_of_values(self.show_plus_from_user(tgid))
                 - self.abs_sum_of_values(self.show_minus_from_user(tgid)))
+
+    def full_debt_for_person(self, owner_tgid: int, person):
+        full_debt = sum([i.value for i in self.debt.filter(DebtRecord.user_tgid == owner_tgid,
+                                                           DebtRecord.person == person,
+                                                           DebtRecord.debt_type == '-+')]) - \
+                    sum([i.value for i in self.debt.filter(DebtRecord.user_tgid == owner_tgid,
+                                                           DebtRecord.person == person,
+                                                           DebtRecord.debt_type == '+-')])
+        return full_debt

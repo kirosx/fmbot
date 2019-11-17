@@ -1,8 +1,8 @@
 from telebot import TeleBot
 from db.maindb import Database
 from utils import command_checker, allow_user, callback_delete_checker
-from db.dbclass import PaymentRecord, User
-from config import SPENT, EARN, TOTAL, NOPAY
+from db.dbclass import PaymentRecord, User, DebtRecord
+from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES
 from keyboard import Keyboard
 
 
@@ -13,7 +13,7 @@ class HandlerRecord:
         self.keyboard = Keyboard()
 
     def run_handlers(self):
-        @self.bot.message_handler(func=lambda m: all((command_checker(m.text), allow_user(m.from_user.id))))
+        @self.bot.message_handler(func=lambda m: all((command_checker(m.text, PAY_TYPES), allow_user(m.from_user.id))))
         def make_record(message):
             payment_type, value, target = message.text.split()
             payment = PaymentRecord(message.from_user.id, payment_type, value, target)
@@ -21,6 +21,23 @@ class HandlerRecord:
             self.db.session.commit()
             self.bot.send_message(message.from_user.id, 'RECORDED\n' + message.text,
                                   reply_markup=self.keyboard.delete_record_button(payment))
+
+        @self.bot.message_handler(func=lambda m: all((command_checker(m.text, DEBT_TYPES), allow_user(m.from_user.id))))
+        def make_debt_record(message):
+            typ, val, tar = message.text.split()
+            debt = DebtRecord(message.from_user.id, typ, val, tar)
+            self.db.session.add(debt)
+            self.db.session.commit()
+            self.bot.send_message(message.from_user.id, debt.return_message())
+            full_debt = self.db.full_debt_for_person(message.from_user.id, debt.person)
+            if full_debt > 0:
+                self.bot.send_message(message.from_user.id, f'{debt.person} own you {full_debt}')
+            elif full_debt < 0:
+                self.bot.send_message(message.from_user.id, f'You own {debt.person} {full_debt}')
+            else:
+                self.bot.send_message(message.from_user.id, f'{debt.person} nothing ownes to you!')
+            # TODO place full_debt checker to utils.py
+
 
     #  @self.bot.message_handler(func=lambda m: True)
     # def unknown_command(message):
@@ -86,6 +103,7 @@ class HandlerReport:
                 return
             for record in day_payments:
                 self.bot.send_message(message.from_user.id, record.return_message())
+            self.bot.send_message(message.from_user.id, TOTAL + str(self.db.total_sum(day_payments)))
 
 
 class HandlerCallback:

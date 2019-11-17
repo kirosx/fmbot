@@ -48,3 +48,26 @@ class PaymentRecord(Base):
 
     def __repr__(self):
         return f'{self.user_tgid} {self.payment_type} {self.target} {self.value}\n{self.time}'
+
+
+class DebtRecord(Base):
+    __tablename__ = 'debt'
+    id = Column(Integer, primary_key=True)
+    user_tgid = Column(Integer, ForeignKey('users.tgid'))
+    debt_type = Column(String(3))
+    value = Column(Float)
+    person = Column(String(50))
+    time = Column(DateTime, default=datetime.utcnow)
+
+    def __init__(self, tgid, typ, value, person):
+        self.user_tgid = tgid
+        self.debt_type = typ
+        self.value = float(value)
+        self.person = person.title()
+
+    def return_message(self):
+        point = 'Занял(а)' if self.debt_type == '-+' else 'Вернул(а)'
+        return f'{self.person} {point} {self.value}'
+
+    def __repr__(self):
+        return self.return_message()
