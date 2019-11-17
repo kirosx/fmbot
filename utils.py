@@ -23,5 +23,11 @@ def callback_delete_checker(callback_string: str, caller_id: int):
     return True if caller_id == int(user) else False  # TODO verify that PaymentRecord belong to user
 
 
-
-
+def debt_message(debt: float, person: str):
+    if debt > 0:
+        message = f'{person} owe you {debt}'
+    elif debt < 0:
+        message = f'You owe {person} {debt}'
+    else:
+        message = f'{person} nothing owe to you!'
+    return message

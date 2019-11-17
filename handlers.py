@@ -1,6 +1,6 @@
 from telebot import TeleBot
 from db.maindb import Database
-from utils import command_checker, allow_user, callback_delete_checker
+from utils import command_checker, allow_user, callback_delete_checker, debt_message
 from db.dbclass import PaymentRecord, User, DebtRecord
 from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES
 from keyboard import Keyboard
@@ -30,14 +30,7 @@ class HandlerRecord:
             self.db.session.commit()
             self.bot.send_message(message.from_user.id, debt.return_message())
             full_debt = self.db.full_debt_for_person(message.from_user.id, debt.person)
-            if full_debt > 0:
-                self.bot.send_message(message.from_user.id, f'{debt.person} own you {full_debt}')
-            elif full_debt < 0:
-                self.bot.send_message(message.from_user.id, f'You own {debt.person} {full_debt}')
-            else:
-                self.bot.send_message(message.from_user.id, f'{debt.person} nothing ownes to you!')
-            # TODO place full_debt checker to utils.py
-
+            self.bot.send_message(message.from_user.id, debt_message(full_debt, debt.person))
 
     #  @self.bot.message_handler(func=lambda m: True)
     # def unknown_command(message):
