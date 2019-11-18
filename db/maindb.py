@@ -67,3 +67,8 @@ class Database(metaclass=Singleton):
                                                            DebtRecord.person == person,
                                                            DebtRecord.debt_type == '+-')])
         return full_debt
+
+    def not_null_debtors(self, tgid: int):
+        debtors = {i.person for i in self.debt.filter(DebtRecord.user_tgid == tgid)
+                   if self.full_debt_for_person(tgid, i.person) != 0}
+        return {i: self.full_debt_for_person(tgid, i) for i in debtors}
