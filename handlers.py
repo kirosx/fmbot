@@ -1,6 +1,6 @@
 from telebot import TeleBot
 from db.maindb import Database
-from utils import command_checker, allow_user, callback_delete_checker, debt_message
+from utils import command_checker, allow_user, callback_delete_payment_checker, debt_message
 from db.dbclass import PaymentRecord, User, DebtRecord
 from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES
 from keyboard import Keyboard
@@ -106,7 +106,7 @@ class HandlerCallback:
         self.keyboard = Keyboard()
 
     def run_handlers(self):
-        @self.bot.callback_query_handler(func=lambda c: callback_delete_checker(c.data, c.from_user.id))
+        @self.bot.callback_query_handler(func=lambda c: callback_delete_payment_checker(c.data, c.from_user.id))
         def delete_record(callback):
             com, obj_id, user = callback.data.split()
             record = self.db.payments.filter(PaymentRecord.id == int(obj_id),
@@ -115,3 +115,22 @@ class HandlerCallback:
                 self.db.session.delete(record)
                 self.db.session.commit()
                 self.bot.send_message(callback.from_user.id, 'Удалено!')
+
+
+class HandlerDebt:
+    def __init__(self, bot: TeleBot):
+        self.db = Database()
+        self.bot = bot
+        self.keyboard = Keyboard()
+
+    def run_handlers(self):
+        @self.bot.message_handler(func=lambda m: m.text == 'Долги')
+        def return_debts(message):
+            debtors = self.db.not_null_debtors(message.from_user.id)
+            if not debtors:
+                self.bot.send_message(message.from_user.id, 'Нет долгов')
+                return
+            for k, v in debtors.items():
+                msg = f'You owe to {k}\n{v}' if v < 0 else f'{k} owe you\n{v}'
+                self.bot.send_message(message.from_user.id, msg,
+                                      reply_markup=self.keyboard.all_debts(message.from_user.id, k))
