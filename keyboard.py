@@ -17,5 +17,10 @@ class Keyboard:
     def main_menu(self):
         self.markup = ReplyKeyboardMarkup(True, row_width=3)
         self.markup.row(*REPORT_BUTTONS)
+        self.markup.row('Долги')
         return self.markup
 
+    def all_debts(self, user, person):
+        self.markup = InlineKeyboardMarkup(row_width=1)
+        self.markup.add(InlineKeyboardButton('All Debts', callback_data=f'deb {person} {user}'))
+        return self.markup

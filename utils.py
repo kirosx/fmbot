@@ -1,4 +1,4 @@
-from config import ALLOWED_USERS
+from config import ALLOWED_USERS, PAY_TYPES
 
 
 def float_checker(float_from_user_str: str):
@@ -18,9 +18,9 @@ def allow_user(message_from_id: int):
     return True if message_from_id in ALLOWED_USERS else False
 
 
-def callback_delete_checker(callback_string: str, caller_id: int):
+def callback_delete_payment_checker(callback_string: str, caller_id: int):
     command, obj, user = callback_string.split()
-    return True if caller_id == int(user) else False  # TODO verify that PaymentRecord belong to user
+    return True if caller_id == int(user) and command in PAY_TYPES else False
 
 
 def debt_message(debt: float, person: str):
