@@ -32,10 +32,6 @@ class HandlerRecord:
             full_debt = self.db.full_debt_for_person(message.from_user.id, debt.person)
             self.bot.send_message(message.from_user.id, debt_message(full_debt, debt.person))
 
-    #  @self.bot.message_handler(func=lambda m: True)
-    # def unknown_command(message):
-    #    self.bot.send_message(message.from_user.id, 'UNRECOGNIZED COMMAND')
-
 
 class HandlerCommands:
     def __init__(self, bot: TeleBot):
