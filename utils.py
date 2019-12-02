@@ -1,4 +1,5 @@
 from config import ALLOWED_USERS, PAY_TYPES
+from db.dbclass import User
 
 
 def float_checker(float_from_user_str: str):

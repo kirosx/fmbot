@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy.orm import relationship
 from datetime import datetime
 
 
@@ -30,7 +29,6 @@ class PaymentRecord(Base):
     __tablename__ = 'payments'
     id = Column(Integer, primary_key=True)
     user_tgid = Column(Integer, ForeignKey('users.tgid'))
-    # user = relationship('User', back_populates='payments')
     payment_type = Column(String(3))
     value = Column(Float)
     target = Column(String(50))
@@ -71,3 +69,4 @@ class DebtRecord(Base):
 
     def __repr__(self):
         return self.return_message()
+

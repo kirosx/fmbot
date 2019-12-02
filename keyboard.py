@@ -1,7 +1,7 @@
 from db.maindb import Database
 from db.dbclass import PaymentRecord
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
-from config import REPORT_BUTTONS
+from config import REPORT_BUTTONS, PROFILE_BUTTONS
 
 
 class Keyboard:
@@ -18,6 +18,7 @@ class Keyboard:
         self.markup = ReplyKeyboardMarkup(True, row_width=3)
         self.markup.row(*REPORT_BUTTONS)
         self.markup.row('Долги')
+        self.markup.row(*PROFILE_BUTTONS)
         return self.markup
 
     def all_debts(self, user, person):
