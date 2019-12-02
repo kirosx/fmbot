@@ -2,7 +2,7 @@ from telebot import TeleBot
 from db.maindb import Database
 from utils import command_checker, allow_user, callback_delete_payment_checker, debt_message
 from db.dbclass import PaymentRecord, User, DebtRecord
-from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES
+from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL
 from keyboard import Keyboard
 
 
@@ -130,3 +130,18 @@ class HandlerDebt:
                 msg = f'You owe to {k}\n{v}' if v < 0 else f'{k} owe you\n{v}'
                 self.bot.send_message(message.from_user.id, msg,
                                       reply_markup=self.keyboard.all_debts(message.from_user.id, k))
+
+
+class HandlerProfile:
+    def __init__(self, bot: TeleBot):
+        self.db = Database()
+        self.bot = bot
+        self.keyboard = Keyboard()
+
+    def run_handlers(self):
+        @self.bot.message_handler(func=lambda m: m.text in PROFILE_BUTTONS)
+        def profile_answer(m):
+            if m.text == PROFILE_BUTTONS[0]:
+                self.bot.send_message(m.from_user.id, self.db.find_user_by_tgid(m.from_user.id).welcome_message())
+                return
+            self.bot.send_message(m.from_user.id, MAIL)

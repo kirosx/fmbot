@@ -1,5 +1,5 @@
 from telebot import TeleBot
-from handlers import HandlerRecord, HandlerCommands, HandlerCallback, HandlerReport, HandlerDebt
+from handlers import HandlerRecord, HandlerCommands, HandlerCallback, HandlerReport, HandlerDebt, HandlerProfile
 
 
 class HandlerBuilder:
@@ -9,6 +9,7 @@ class HandlerBuilder:
         self.handler_callback = HandlerCallback(bot)
         self.handler_report = HandlerReport(bot)
         self.handler_debt = HandlerDebt(bot)
+        self.handler_profile = HandlerProfile(bot)
 
     def run_handlers(self):
         for handler in self.__dict__.values():
