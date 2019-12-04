@@ -1,4 +1,4 @@
-from config import ALLOWED_USERS, PAY_TYPES
+from config import ALLOWED_USERS, PAY_TYPES, CALLBACKCOMMANDS
 from db.dbclass import User
 
 
@@ -21,7 +21,7 @@ def allow_user(message_from_id: int):
 
 def callback_delete_payment_checker(callback_string: str, caller_id: int):
     command, obj, user = callback_string.split()
-    return True if caller_id == int(user) and command in PAY_TYPES else False
+    return True if caller_id == int(user) and command in CALLBACKCOMMANDS else False
 
 
 def debt_message(debt: float, person: str):
