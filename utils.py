@@ -1,11 +1,10 @@
-from config import ALLOWED_USERS, PAY_TYPES, CALLBACKCOMMANDS
-from db.dbclass import User
+from config import ALLOWED_USERS, CALLBACKCOMMANDS
 
 
 def float_checker(float_from_user_str: str):
     try:
         float(float_from_user_str)
-    except Exception:
+    except ValueError:
         return False
     return True
 
