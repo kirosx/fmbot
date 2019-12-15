@@ -44,8 +44,8 @@ class PaymentRecord(Base):
         self.value = float(value)
         self.target = target
 
-    def __repr__(self):
-        return f'{self.user_tgid} {self.payment_type} {self.target} {self.value}\n{self.time}'
+    # def __repr__(self):
+    #     return f'{self.user_tgid} {self.payment_type} {self.target} {self.value}\n{self.time}'
 
 
 class DebtRecord(Base):
