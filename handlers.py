@@ -4,6 +4,7 @@ from utils import command_checker, allow_user, callback_delete_payment_checker, 
 from db.dbclass import PaymentRecord, User, DebtRecord
 from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL
 from keyboard import Keyboard
+from charts.chart import ChartBuilder
 
 
 class HandlerRecord:
@@ -64,35 +65,21 @@ class HandlerReport:
         self.db = Database()
         self.keyboard = Keyboard()
 
-        # @self.bot.message_handler(commands=['all'])
-        # def report_all_for_user(message):
-        #     # for record in self.db.show_records_by_tgid(message.from_user.id):
-        #     self.bot.send_message(message.from_user.id, self.db.show_recs_tabulate_by_user(message.from_user.id))
-        #     self.bot.send_message(message.from_user.id, TOTAL + str(self.db.total_result_for_user(message.from_user.id)))
-        #
-        # @self.bot.message_handler(commands=['minus'])
-        # def report_minus_user(message):
-        #     query = self.db.show_minus_from_user(message.from_user.id)
-        #     for i in query:
-        #         self.bot.send_message(message.from_user.id, i)
-        #     self.bot.send_message(message.from_user.id, SPENT + str(self.db.abs_sum_of_values(query)))
-        #
-        # @self.bot.message_handler(commands=['plus'])
-        # def report_minus_user(message):
-        #     query = self.db.show_plus_from_user(message.from_user.id)
-        #     for i in query:
-        #         self.bot.send_message(message.from_user.id, i)
-        #     self.bot.send_message(message.from_user.id, EARN + str(self.db.abs_sum_of_values(query)))
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: m.text in self.report_dict.keys())
         def day_report(message):
-            day_payments = self.db.select_payments_from_days(message.from_user.id, self.report_dict[message.text])
+            days = self.report_dict[message.text]
+            day_payments = self.db.select_payments_from_days(message.from_user.id, days)
             if not day_payments:
                 self.bot.send_message(message.from_user.id, NOPAY)
                 return
             for record in day_payments:
                 self.bot.send_message(message.from_user.id, record.return_message())
             self.bot.send_message(message.from_user.id, TOTAL + str(self.db.total_sum(day_payments)))
+
+            chart = ChartBuilder(day_payments, message.from_user.id, days)
+            testchart = chart.test_plot()
+            self.bot.send_photo(message.from_user.id, open(testchart, 'rb'))
 
 
 class HandlerCallback:
