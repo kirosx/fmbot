@@ -25,3 +25,9 @@ class Keyboard:
         self.markup = InlineKeyboardMarkup(row_width=1)
         self.markup.add(InlineKeyboardButton('All Debts', callback_data=f'deb {person} {user}'))
         return self.markup
+
+    def chart_menu(self, user, days, menu_chart: dict):
+        self.markup = InlineKeyboardMarkup(row_width=1)
+        for k, v in menu_chart.items():
+            self.markup.add(InlineKeyboardButton(k, callback_data=f'chart {v} {user} {days}'))
+        return self.markup
