@@ -2,7 +2,7 @@ from telebot import TeleBot
 from db.maindb import Database
 from utils import command_checker, allow_user, callback_delete_payment_checker, debt_message
 from db.dbclass import PaymentRecord, User, DebtRecord
-from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL
+from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL, UNRCG
 from keyboard import Keyboard
 from charts.chart import ChartBuilder
 
@@ -68,18 +68,17 @@ class HandlerReport:
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: m.text in self.report_dict.keys())
         def day_report(message):
+            user = message.from_user.id
             days = self.report_dict[message.text]
-            day_payments = self.db.select_payments_from_days(message.from_user.id, days)
+            day_payments = self.db.select_payments_from_days(user, days)
             if not day_payments:
-                self.bot.send_message(message.from_user.id, NOPAY)
+                self.bot.send_message(user, NOPAY)
                 return
             for record in day_payments:
-                self.bot.send_message(message.from_user.id, record.return_message())
-            self.bot.send_message(message.from_user.id, TOTAL + str(self.db.total_sum(day_payments)))
-
-            chart = ChartBuilder(day_payments, message.from_user.id, days)
-            testchart = chart.test_plot()
-            self.bot.send_photo(message.from_user.id, open(testchart, 'rb'))
+                self.bot.send_message(user, record.return_message())
+            chart = ChartBuilder(day_payments, user, days)
+            self.bot.send_message(user, TOTAL + str(self.db.total_sum(day_payments)),
+                                  reply_markup=self.keyboard.chart_menu(user, days, chart.menu_chart))
 
 
 class HandlerCallback:
@@ -132,3 +131,7 @@ class HandlerProfile:
                 self.bot.send_message(m.from_user.id, self.db.find_user_by_tgid(m.from_user.id).welcome_message())
                 return
             self.bot.send_message(m.from_user.id, MAIL)
+
+        @self.bot.message_handler(func=lambda m: True)
+        def any_message(m):
+            self.bot.send_message(m.from_user.id, UNRCG)
