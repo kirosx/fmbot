@@ -1,4 +1,4 @@
-from config import ALLOWED_USERS, CALLBACKCOMMANDS
+from config import ALLOWED_USERS, CALLBACKCOMMANDS, CHARTSSTRING
 
 
 def float_checker(float_from_user_str: str):
@@ -11,7 +11,7 @@ def float_checker(float_from_user_str: str):
 
 def command_checker(user_string: str, types: list):
     spl = user_string.split()
-    return True if len(spl) > 2 and spl[0] in types and float_checker(spl[1]) else False
+    return True if len(spl) == 3 and spl[0] in types and float_checker(spl[1]) else False
 
 
 def allow_user(message_from_id: int):
@@ -19,9 +19,15 @@ def allow_user(message_from_id: int):
 
 
 def callback_delete_payment_checker(callback_string: str, caller_id: int):
-    if len(callback_string) == 3:
-        command, obj, user = callback_string.split()
+    if len(callback_string.split()) == 3 and callback_string.split()[0] in ('del', 'deb'):
+        command, user, obj = callback_string.split()
         return True if caller_id == int(user) and command in CALLBACKCOMMANDS else False
+
+
+def chart_callback_checker(callback_string: str, caller_id: int):
+    callback = callback_string.split()
+    return True if len(callback) == 4 and callback[0] == 'chart' and callback[1] in CHARTSSTRING \
+                   and int(callback[2]) == caller_id else False
 
 
 def debt_message(debt: float, person: str):
