@@ -74,3 +74,8 @@ class ChartBuilder:
         if len(self.plus_values) > 1:
             self.menu_chart['график трат'] = 'minus'
         return self.menu_chart
+
+    def build_chart_for_callback(self, type_chart):
+        chart = {'all': self.test_plot, 'plus': self.pie_chart_plus, 'minus': self.pie_chart_minus}
+        chart[type_chart]()
+        return self.saved_charts[-1]

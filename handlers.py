@@ -1,8 +1,8 @@
 from telebot import TeleBot
 from db.maindb import Database
-from utils import command_checker, allow_user, callback_delete_payment_checker, debt_message
+from utils import command_checker, allow_user, callback_delete_payment_checker, debt_message, chart_callback_checker
 from db.dbclass import PaymentRecord, User, DebtRecord
-from config import SPENT, EARN, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL, UNRCG
+from config import WELCOME, TOTAL, NOPAY, PAY_TYPES, DEBT_TYPES, PROFILE_BUTTONS, MAIL, UNRCG
 from keyboard import Keyboard
 from charts.chart import ChartBuilder
 
@@ -49,7 +49,7 @@ class HandlerCommands:
                 self.db.session.add(new_user)
                 self.db.session.commit()
                 self.bot.send_message(new_user.tgid, new_user.welcome_message())
-            self.bot.send_message(user.tgid, f'Welcome to familybot you are registered as {user.name}',
+            self.bot.send_message(user.tgid, f'{WELCOME} {user.name}',
                                   reply_markup=self.keyboard.main_menu())
 
 
@@ -90,13 +90,24 @@ class HandlerCallback:
     def run_handlers(self):
         @self.bot.callback_query_handler(func=lambda c: callback_delete_payment_checker(c.data, c.from_user.id))
         def delete_record(callback):
-            com, obj_id, user = callback.data.split()
-            record = self.db.payments.filter(PaymentRecord.id == int(obj_id),
-                                             PaymentRecord.user_tgid == int(user)).first()
-            if record:
-                self.db.session.delete(record)
-                self.db.session.commit()
-                self.bot.send_message(callback.from_user.id, 'Удалено!')
+            com, user, target = callback.data.split()
+            if com == 'del':
+                record = self.db.payments.filter(PaymentRecord.id == int(target),
+                                                 PaymentRecord.user_tgid == int(user)).first()
+                if record:
+                    self.db.session.delete(record)
+                    self.db.session.commit()
+                    self.bot.send_message(callback.from_user.id, 'Удалено!')
+                if not record:
+                    self.bot.send_message(callback.from_user.id, 'Запись не найдена!')
+            for i in self.db.all_debs_for_person(user, target):
+                self.bot.send_message(user, i.return_message())
+
+        @self.bot.callback_query_handler(func=lambda c: chart_callback_checker(c.data, c.from_user.id))
+        def show_chart(callback):
+            type_chart, user, days = callback.data.split()[1:]
+            newchart = ChartBuilder(self.db.select_payments_from_days(user, int(days)), user, int(days))
+            self.bot.send_photo(callback.from_user.id, open(newchart.build_chart_for_callback(type_chart)))
 
 
 class HandlerDebt:
