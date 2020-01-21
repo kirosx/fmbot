@@ -11,7 +11,7 @@ class Keyboard:
 
     def delete_record_button(self, record: PaymentRecord):
         self.markup = InlineKeyboardMarkup(row_width=1)
-        self.markup.add(InlineKeyboardButton('Delete', callback_data=f'del {record.id} {record.user_tgid}'))
+        self.markup.add(InlineKeyboardButton('Удалить', callback_data=f'del {record.user_tgid} {record.id}'))
         return self.markup
 
     def main_menu(self):
@@ -23,7 +23,7 @@ class Keyboard:
 
     def all_debts(self, user, person):
         self.markup = InlineKeyboardMarkup(row_width=1)
-        self.markup.add(InlineKeyboardButton('All Debts', callback_data=f'deb {person} {user}'))
+        self.markup.add(InlineKeyboardButton('Все записи', callback_data=f'deb {user} {person}'))
         return self.markup
 
     def chart_menu(self, user, days, menu_chart: dict):
