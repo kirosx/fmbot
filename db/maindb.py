@@ -72,3 +72,6 @@ class Database(metaclass=Singleton):
         debtors = {i.person for i in self.debt.filter(DebtRecord.user_tgid == tgid)
                    if self.full_debt_for_person(tgid, i.person) != 0}
         return {i: self.full_debt_for_person(tgid, i) for i in debtors}
+
+    def all_debs_for_person(self, tgid, person):
+        return [i for i in self.debt.filter(DebtRecord.user_tgid == tgid, DebtRecord.person == person)]

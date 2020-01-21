@@ -65,7 +65,7 @@ class DebtRecord(Base):
 
     def return_message(self):
         point = 'Занял(а)' if self.debt_type == '-+' else 'Вернул(а)'
-        return f'{self.person} {point} {self.value}'
+        return f'{self.time} {self.person} {point} {self.value}'
 
     def __repr__(self):
         return self.return_message()
