@@ -28,7 +28,7 @@ class User(Base):
 class PaymentRecord(Base):
     __tablename__ = 'payments'
     id = Column(Integer, primary_key=True)
-    user_tgid = Column(Integer, ForeignKey('users.tgid'))
+    user_tgid = Column(Integer, ForeignKey('users.tgid', ondelete='CASCADE'))
     payment_type = Column(String(3))
     value = Column(Float)
     target = Column(String(50))

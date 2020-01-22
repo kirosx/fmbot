@@ -69,9 +69,9 @@ class ChartBuilder:
 
     def make_menu(self):
         self.menu_chart['общий'] = 'all'
-        if len(self.minus_values) > 1:
-            self.menu_chart['график доходов'] = 'plus'
         if len(self.plus_values) > 1:
+            self.menu_chart['график доходов'] = 'plus'
+        if len(self.minus_values) > 1:
             self.menu_chart['график трат'] = 'minus'
         return self.menu_chart
 

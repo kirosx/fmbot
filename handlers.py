@@ -49,7 +49,7 @@ class HandlerCommands:
                 self.db.session.add(new_user)
                 self.db.session.commit()
                 self.bot.send_message(new_user.tgid, new_user.welcome_message())
-            self.bot.send_message(user.tgid, f'{WELCOME} {user.name}',
+            self.bot.send_message(message.from_user.id, f'{WELCOME} {message.from_user.first_name}',
                                   reply_markup=self.keyboard.main_menu())
 
 
@@ -106,8 +106,10 @@ class HandlerCallback:
         @self.bot.callback_query_handler(func=lambda c: chart_callback_checker(c.data, c.from_user.id))
         def show_chart(callback):
             type_chart, user, days = callback.data.split()[1:]
-            newchart = ChartBuilder(self.db.select_payments_from_days(user, int(days)), user, int(days))
-            self.bot.send_photo(callback.from_user.id, open(newchart.build_chart_for_callback(type_chart)))
+            newchart = ChartBuilder(self.db.select_payments_from_days(int(user), int(days)), int(user), int(days))
+            newchartname = newchart.build_chart_for_callback(type_chart)
+            self.bot.send_photo(callback.from_user.id, open(newchartname, 'rb'))
+            newchart.delete_all_charts()
 
 
 class HandlerDebt:
