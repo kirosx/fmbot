@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from config import WELCOME, REGTIME
 
 
 Base = declarative_base()
@@ -12,9 +13,10 @@ class User(Base):
     name = Column(String(30))
     tgid = Column(Integer, unique=True)
     tg_username = Column(String(30))
+    registered = Column(DateTime, default=datetime.utcnow)
 
     def welcome_message(self):
-        return f'Welcome to FamilyBot you are registered as {self.name}'
+        return f'{WELCOME} {self.name}\n{REGTIME} {self.registered}'
 
     def __init__(self, name, tgid, tg_username=None):
         self.name = name
@@ -70,3 +72,24 @@ class DebtRecord(Base):
     def __repr__(self):
         return self.return_message()
 
+
+class UserCategory(Base):
+    __tablename__ = 'users_categories'
+    id = Column(Integer, primary_key=True)
+    user_tgid = Column(Integer, ForeignKey('users.tgid'))
+    category = Column(String(50))
+
+    def __init__(self, user_tgid, category: str):
+        self.user_tgid = user_tgid
+        self.category = category.lower()
+
+
+class KeyWordCategory(Base):
+    __tablename__ = 'keywords'
+    id = Column(Integer, primary_key=True)
+    user_tgid = Column(ForeignKey('users.tgid'))
+    category = Column(ForeignKey('users_categories.id'))
+
+    def __init__(self, user_tgid, category_id: int):
+        self.user_tgid = user_tgid
+        self.category = category_id

@@ -2,6 +2,7 @@ from matplotlib.dates import date2num
 import pylab
 from datetime import datetime
 from os import remove
+from config import ALL, PROFIT, EXPENSES
 
 
 class ChartBuilder:
@@ -47,12 +48,12 @@ class ChartBuilder:
 
     def pie_chart_plus(self):
         pylab.pie(x=[i for i in self.plus_values.values()], labels=self.plus_values.keys())
-        pylab.xlabel('Доходы')
+        pylab.xlabel(PROFIT)
         self.save_chart_and_clean_canvas(self.makename_and_add2list())
 
     def pie_chart_minus(self):
         pylab.pie(x=[abs(i) for i in self.minus_values.values()], labels=self.minus_values.keys())
-        pylab.xlabel('Расходы')
+        pylab.xlabel(EXPENSES)
         self.save_chart_and_clean_canvas(self.makename_and_add2list())
 
     def delete_all_charts(self):
@@ -68,11 +69,11 @@ class ChartBuilder:
             self.pie_chart_plus()
 
     def make_menu(self):
-        self.menu_chart['общий'] = 'all'
+        self.menu_chart[ALL] = 'all'
         if len(self.plus_values) > 1:
-            self.menu_chart['график доходов'] = 'plus'
+            self.menu_chart[PROFIT] = 'plus'
         if len(self.minus_values) > 1:
-            self.menu_chart['график трат'] = 'minus'
+            self.menu_chart[EXPENSES] = 'minus'
         return self.menu_chart
 
     def build_chart_for_callback(self, type_chart):

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import DATABASE_URL, REMOTE_DATABASE
-from .dbclass import User, PaymentRecord, DebtRecord
+from .dbclass import User, PaymentRecord, DebtRecord, UserCategory, KeyWordCategory
 from tabulate import tabulate
 from datetime import timedelta, datetime
 
@@ -24,6 +24,8 @@ class Database(metaclass=Singleton):
         self.users = self.session.query(User)
         self.payments = self.session.query(PaymentRecord)
         self.debt = self.session.query(DebtRecord)
+        self.categories = self.session.query(UserCategory)
+        self.keywords = self.session.query(KeyWordCategory)
 
     @staticmethod
     def abs_sum_of_values(query):
