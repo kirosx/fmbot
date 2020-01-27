@@ -38,3 +38,14 @@ def debt_message(debt: float, person: str):
     else:
         message = f'{person} nothing owe to you!'
     return message
+
+
+def create_database_model():
+    '''
+    Перед созданием таблиц необходимо создать бд с именем DBNAME из config.py
+    '''
+    from db.maindb import Database
+    from db.dbclass import Base
+    db = Database()
+    Base.metadata.create_all(db.engine)
+    return 'database created'
