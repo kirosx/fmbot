@@ -1,6 +1,7 @@
 TOKEN = '***TOKEN***'
 ALLOWED_USERS = []
-DATABASE_URL = 'mysql://@localhost/fmbot?charset=utf8'
+DBNAME = 'fmbot'
+DATABASE_URL = f'mysql://@localhost/{DBNAME}?charset=utf8'
 PAY_TYPES = ['+', '-']
 DEBT_TYPES = ['+-', '-+']
 REMOTE_DATABASE = ''
@@ -25,6 +26,10 @@ REPORTDICT = {
         'Выписка за неделю': 7,
         'Выписка за месяц': 30
     }
+ALL = 'Все записи'
+PROFIT = 'Доходы'
+EXPENSES = 'Расходы'
+REGTIME = 'Дата регистрации:'
 HELPMESSAGE = 'Здравствуйте вас приветствует <strong>BudgetBot</strong>\n' \
               'Бот принимает комманды вида:\n <code>+ сумма цель</code>\n' \
               'либо: \n<code>- сумма цель</code>\n' \
