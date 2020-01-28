@@ -145,7 +145,7 @@ class HandlerCategories(AbstractHandler):
                 self.bot.delete_message(message_id=message.id)
                 self.bot.send_message(user, CANCEL, reply_markup=self.keyboard.main_menu())
                 return
-            if message.upper() not in [i.category for i in self.db.user_categories(user)]:
+            if message.text.upper() not in [i.category for i in self.db.user_categories(user)]:
                 new_category = UserCategory(user, message.text.upper())
                 self.db.session.add(new_category)
                 self.db.session.commit()
