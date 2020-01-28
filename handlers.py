@@ -140,10 +140,13 @@ class HandlerCategories(AbstractHandler):
                 self.bot.register_next_step_handler_by_chat_id(c.from_user.id, save_category)
 
         def save_category(message):
+            user = message.from_user.id
             if message == CANCEL:
+                self.bot.delete_message(message_id=message.id)
+                self.bot.send_message(user, CANCEL, reply_markup=self.keyboard.main_menu())
                 return
-            if message not in self.db.user_categories(message.from_user.id):
-                new_category = UserCategory(message.from_user.id, message.text.lower())
+            if message.upper() not in [i.category for i in self.db.user_categories(user)]:
+                new_category = UserCategory(user, message.text.upper())
                 self.db.session.add(new_category)
                 self.db.session.commit()
             else:
