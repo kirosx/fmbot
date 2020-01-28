@@ -143,7 +143,7 @@ class HandlerCategories(AbstractHandler):
             if message == CANCEL:
                 return
             if message not in self.db.user_categories(message.from_user.id):
-                newcategory = UserCategory(message.from_user.id, message.lower())
+                newcategory = UserCategory(message.from_user.id, message.text.lower())
                 self.db.session.add(newcategory)
                 self.db.session.commit()
             else:
