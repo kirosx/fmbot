@@ -40,6 +40,11 @@ def debt_message(debt: float, person: str):
     return message
 
 
+def category_command_checker(callback_string):
+    command = callback_string.split()[0]
+    return True if command == 'addcategory' else False
+
+
 def create_database_model():
     '''
     Перед созданием таблиц необходимо создать бд с именем DBNAME из config.py
