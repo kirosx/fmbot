@@ -14,5 +14,5 @@ class Bot:
 
 
 if __name__ == '__main__':
-    family_bot = Bot(TOKEN)
-    family_bot.run_bot()
+    budget_bot = Bot(TOKEN)
+    budget_bot.run_bot()

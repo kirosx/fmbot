@@ -1,17 +1,22 @@
 from telebot import TeleBot
 from db.maindb import Database
-from utils import command_checker,callback_delete_payment_checker, debt_message, chart_callback_checker
-from db.dbclass import PaymentRecord, User, DebtRecord
+from utils import command_checker,callback_delete_payment_checker, debt_message, chart_callback_checker, category_command_checker
+from db.dbclass import PaymentRecord, User, DebtRecord, UserCategory
 from config import *
 from keyboard import Keyboard
 from charts.chart import ChartBuilder
 
 
-class HandlerRecord:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+class AbstractHandler:
+    def __init__(self, bot):
         self.db = Database()
+        self.bot = bot
         self.keyboard = Keyboard()
+
+
+class HandlerRecord(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: command_checker(m.text, PAY_TYPES))
@@ -34,11 +39,9 @@ class HandlerRecord:
             self.bot.send_message(message.from_user.id, debt_message(full_debt, debt.person))
 
 
-class HandlerCommands:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
-        self.db = Database()
-        self.keyboard = Keyboard()
+class HandlerCommands(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.message_handler(commands=['start'])
@@ -57,13 +60,11 @@ class HandlerCommands:
             self.bot.send_message(message.from_user.id, HELPMESSAGE, parse_mode='HTML')
 
 
-class HandlerReport:
+class HandlerReport(AbstractHandler):
     report_dict = REPORTDICT
 
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
-        self.db = Database()
-        self.keyboard = Keyboard()
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: m.text in self.report_dict.keys())
@@ -81,11 +82,9 @@ class HandlerReport:
                                   reply_markup=self.keyboard.chart_menu(user, days, chart.menu_chart))
 
 
-class HandlerCallback:
-    def __init__(self, bot: TeleBot):
-        self.db = Database()
-        self.bot = bot
-        self.keyboard = Keyboard()
+class HandlerCallback(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.callback_query_handler(func=lambda c: callback_delete_payment_checker(c.data, c.from_user.id))
@@ -112,11 +111,9 @@ class HandlerCallback:
             newchart.delete_all_charts()
 
 
-class HandlerDebt:
-    def __init__(self, bot: TeleBot):
-        self.db = Database()
-        self.bot = bot
-        self.keyboard = Keyboard()
+class HandlerDebt(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: m.text == DEBTS)
@@ -131,17 +128,46 @@ class HandlerDebt:
                                       reply_markup=self.keyboard.all_debts(message.from_user.id, k))
 
 
-class HandlerProfile:
+class HandlerCategories(AbstractHandler):
     def __init__(self, bot: TeleBot):
-        self.db = Database()
-        self.bot = bot
-        self.keyboard = Keyboard()
+        super().__init__(bot)
+
+    def run_handlers(self):
+        @self.bot.callback_query_handler(func=lambda c: category_command_checker(c.data))
+        def saving_new_category(c):
+            if int(c.data.split()[1]) == c.from_user.id:
+                self.bot.send_message(c.from_user.id, NAMECAT)
+                self.bot.register_next_step_handler_by_chat_id(c.from_user.id, save_category)
+
+        def save_category(message):
+            if message == CANCEL:
+                return
+            if message not in self.db.user_categories(message.from_user.id):
+                newcategory = UserCategory(message.from_user.id, message.lower())
+                self.db.session.add(newcategory)
+                self.db.session.commit()
+            else:
+                self.bot.send_message(message.from_user.id, ALLREADYCAT)
+
+
+class HandlerProfile(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
 
     def run_handlers(self):
         @self.bot.message_handler(func=lambda m: m.text in PROFILE_BUTTONS)
         def profile_answer(m):
+            user = m.from_user.id
             if m.text == PROFILE_BUTTONS[0]:
-                self.bot.send_message(m.from_user.id, self.db.find_user_by_tgid(m.from_user.id).welcome_message())
+                self.bot.send_message(user, self.db.find_user_by_tgid(user).welcome_message())
+                user_categories = self.db.user_categories(user)
+                if not user_categories:
+                    self.bot.send_message(user, NOCAT, reply_markup=self.keyboard.add_category(user))
+                    return
+                self.bot.send_message(user, YOURCAT)
+                for i in user_categories:
+                    self.bot.send_message(user, i, reply_markup=self.keyboard.watch_or_delete_category(user, i))
+                self.bot.send_message(user, f'{ALLCAT} {len(user_categories)}', reply_markup=self.keyboard.add_category(user))
                 return
             self.bot.send_message(m.from_user.id, MAIL)
 
