@@ -77,3 +77,9 @@ class Database(metaclass=Singleton):
 
     def all_debs_for_person(self, tgid, person):
         return [i for i in self.debt.filter(DebtRecord.user_tgid == tgid, DebtRecord.person == person)]
+
+    def user_categories(self, tgid):
+        return [i for i in self.categories.filter(UserCategory.user_tgid == tgid)]
+
+    def keywords_from_category(self, tgid, category):
+        return [i for i in self.keywords.filter(KeyWordCategory.user_tgid == tgid, KeyWordCategory.category == category)]
