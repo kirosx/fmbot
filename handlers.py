@@ -1,6 +1,6 @@
 from telebot import TeleBot
 from db.maindb import Database
-from utils import command_checker,callback_delete_payment_checker, debt_message, chart_callback_checker, category_command_checker
+from utils import *
 from db.dbclass import PaymentRecord, User, DebtRecord, UserCategory
 from config import *
 from keyboard import Keyboard
@@ -136,18 +136,28 @@ class HandlerCategories(AbstractHandler):
         @self.bot.callback_query_handler(func=lambda c: category_command_checker(c.data))
         def saving_new_category(c):
             if int(c.data.split()[1]) == c.from_user.id:
-                self.bot.send_message(c.from_user.id, NAMECAT)
+                self.bot.send_message(c.from_user.id, NAMECAT, reply_markup=self.keyboard.cancel_button())
                 self.bot.register_next_step_handler_by_chat_id(c.from_user.id, save_category)
 
         def save_category(message):
             if message == CANCEL:
                 return
             if message not in self.db.user_categories(message.from_user.id):
-                newcategory = UserCategory(message.from_user.id, message.text.lower())
-                self.db.session.add(newcategory)
+                new_category = UserCategory(message.from_user.id, message.text.lower())
+                self.db.session.add(new_category)
                 self.db.session.commit()
             else:
                 self.bot.send_message(message.from_user.id, ALLREADYCAT)
+
+        @self.bot.callback_query_handler(func=lambda c: category_delete_checker(c.data))
+        def delete_category(c):
+            user, category = c.data.split()[1:]
+            obj = self.db.return_single_category(int(user), category)
+            if obj:
+                self.db.session.delete(obj)
+                self.db.session.commit()
+                self.bot.send_message(int(user), f'{CATDELETED}{category}')
+
 
 
 class HandlerProfile(AbstractHandler):
@@ -166,7 +176,7 @@ class HandlerProfile(AbstractHandler):
                     return
                 self.bot.send_message(user, YOURCAT)
                 for i in user_categories:
-                    self.bot.send_message(user, i, reply_markup=self.keyboard.watch_or_delete_category(user, i))
+                    self.bot.send_message(user, i.category, reply_markup=self.keyboard.watch_or_delete_category(user, i.category))
                 self.bot.send_message(user, f'{ALLCAT} {len(user_categories)}', reply_markup=self.keyboard.add_category(user))
                 return
             self.bot.send_message(m.from_user.id, MAIL)

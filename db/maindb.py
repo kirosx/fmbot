@@ -83,3 +83,6 @@ class Database(metaclass=Singleton):
 
     def keywords_from_category(self, tgid, category):
         return [i for i in self.keywords.filter(KeyWordCategory.user_tgid == tgid, KeyWordCategory.category == category)]
+
+    def return_single_category(self, tgid, category):
+        return self.categories.filter(UserCategory.user_tgid == tgid, UserCategory.category == category).first()

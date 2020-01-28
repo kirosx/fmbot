@@ -45,6 +45,10 @@ def category_command_checker(callback_string):
     return True if command == 'addcategory' else False
 
 
+def category_delete_checker(callback_string):
+    return True if callback_string.split()[0] == 'delcategory' else False
+
+
 def create_database_model():
     '''
     Перед созданием таблиц необходимо создать бд с именем DBNAME из config.py
