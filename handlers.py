@@ -141,14 +141,15 @@ class HandlerCategories(AbstractHandler):
 
         def save_category(message):
             user = message.from_user.id
-            if message == CANCEL:
-                self.bot.delete_message(message_id=message.id)
+            text = message.text
+            if text == CANCEL:
                 self.bot.send_message(user, CANCEL, reply_markup=self.keyboard.main_menu())
                 return
-            if message.text.upper() not in [i.category for i in self.db.user_categories(user)]:
-                new_category = UserCategory(user, message.text.upper())
+            if text.upper() not in [i.category for i in self.db.user_categories(user)]:
+                new_category = UserCategory(user, text.upper())
                 self.db.session.add(new_category)
                 self.db.session.commit()
+                self.bot.send_message(user, f'{REC}{text}', reply_markup=self.keyboard.main_menu())
             else:
                 self.bot.send_message(message.from_user.id, ALLREADYCAT)
 
