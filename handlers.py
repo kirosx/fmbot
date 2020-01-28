@@ -1,7 +1,7 @@
 from telebot import TeleBot
 from db.maindb import Database
 from utils import *
-from db.dbclass import PaymentRecord, User, DebtRecord, UserCategory
+from db.dbclass import PaymentRecord, User, DebtRecord, UserCategory, KeyWordCategory
 from config import *
 from keyboard import Keyboard
 from charts.chart import ChartBuilder
@@ -162,6 +162,42 @@ class HandlerCategories(AbstractHandler):
                 self.db.session.commit()
                 self.bot.send_message(int(user), f'{CATDELETED}{category}')
 
+
+class HandlerKeywords(AbstractHandler):
+    def __init__(self, bot):
+        super().__init__(bot)
+
+    def run_handlers(self):
+        @self.bot.callback_query_handler(func=lambda c: keyword_callback_checker(c.data))
+        def show_keywords(c):
+            user, category = c.data.split()[1:]
+            keywords = self.db.keywords_from_category(int(user), category)
+            if not keywords:
+                self.bot.send_message(int(user), NOKEYWORDS, reply_markup=self.keyboard.add_keyword(user, category))
+                return
+            for i in [i.keyword for i in keywords]:
+                self.bot.send_message(int(user), i)
+            self.bot.send_message(int(user), f'{ALLKEYWORD} {len(keywords)}', reply_markup=self.keyboard.add_keyword(user, category))
+
+        @self.bot.callback_query_handler(func=lambda c: add_keyword_checker(c.data))
+        def adding_keyword(c):
+            if int(c.data.split()[1]) == c.from_user.id:
+                self.bot.send_message(c.from_user.id, ADDKEYWORD, reply_markup=self.keyboard.cancel_button())
+                self.bot.register_next_step_handler_by_chat_id(c.from_user.id, save_keyword(c.data.split()[:-1]))
+
+        def save_keyword(message, category):
+            user = message.from_user.id
+            keyword = message.text
+            if keyword == CANCEL:
+                self.bot.send_message(user, CANCEL, reply_markup=self.keyboard.main_menu())
+                return
+            if keyword.lower() not in [i.keyword for i in self.db.all_user_keywords(user)]:
+                new_keyword = KeyWordCategory(keyword=keyword, category=category, user_tgid=user)
+                self.db.session.add(new_keyword)
+                self.db.session.commit()
+                self.bot.send_message(user, f'{REC}{keyword}', reply_markup=self.keyboard.main_menu())
+            else:
+                self.bot.send_message(message.from_user.id, ALLREADYCAT)
 
 
 class HandlerProfile(AbstractHandler):

@@ -45,6 +45,14 @@ def category_command_checker(callback_string):
     return True if command == 'addcategory' else False
 
 
+def keyword_callback_checker(callback_string):
+    return True if callback_string.split()[0] == 'keywords' else False
+
+
+def add_keyword_checker(callback_string):
+    return True if callback_string.split()[0] == 'addkeyword' else False
+
+
 def category_delete_checker(callback_string):
     return True if callback_string.split()[0] == 'delcategory' else False
 

@@ -87,9 +87,11 @@ class UserCategory(Base):
 class KeyWordCategory(Base):
     __tablename__ = 'keywords'
     id = Column(Integer, primary_key=True)
+    keyword = Column(String(50))
     user_tgid = Column(ForeignKey('users.tgid'))
-    category = Column(ForeignKey('users_categories.id'))
+    category = Column(ForeignKey('users_categories.category', ondelete='CASCADE'))
 
-    def __init__(self, user_tgid, category_id: int):
+    def __init__(self, user_tgid, category, keyword):
+        self.keyword = keyword
         self.user_tgid = user_tgid
-        self.category = category_id
+        self.category = category
