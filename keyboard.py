@@ -1,7 +1,7 @@
 from db.maindb import Database
 from db.dbclass import PaymentRecord
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
-from config import REPORT_BUTTONS, PROFILE_BUTTONS
+from config import REPORT_BUTTONS, PROFILE_BUTTONS, DEBTS, ADDCAT, KEYWRDS, DELCAT
 
 
 class Keyboard:
@@ -17,7 +17,7 @@ class Keyboard:
     def main_menu(self):
         self.markup = ReplyKeyboardMarkup(True, row_width=3)
         self.markup.row(*REPORT_BUTTONS)
-        self.markup.row('Долги')
+        self.markup.row(DEBTS)
         self.markup.row(*PROFILE_BUTTONS)
         return self.markup
 
@@ -30,4 +30,16 @@ class Keyboard:
         self.markup = InlineKeyboardMarkup(row_width=1)
         for k, v in menu_chart.items():
             self.markup.add(InlineKeyboardButton(k, callback_data=f'chart {v} {user} {days}'))
+        return self.markup
+
+    def add_category(self, user):
+        self.markup = InlineKeyboardMarkup(row_width=1)
+        self.markup.add(InlineKeyboardButton(ADDCAT, callback_data=f'addcategory {user}'))
+        return self.markup
+
+    def watch_or_delete_category(self, user, category):
+        self.markup = InlineKeyboardMarkup(row_width=2)
+        watch = InlineKeyboardButton(KEYWRDS, callback_data=f'keywords {user} {category}')
+        delete = InlineKeyboardButton(DELCAT, callback_data=f'delcategory {user} {category}')
+        self.markup.add(watch, delete)
         return self.markup
